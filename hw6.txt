@@ -1,0 +1,177 @@
+1. For each pair of atomic sentences, give the most general unifier if it exists:
+(a) P(A, A, B), P(x, y, z).
+    θ = {x/A, y/B, z/B}
+
+(b) Q(y, G(A, B)), Q(G(x, x), y).
+    No unifier exists.
+
+(c) R(x,A,z) , R(B,y,z).
+    θ = {x/B, y/A}
+
+(d) Older (Father(y), y), Older (Father(x), John).
+    θ = {x/John, y/John}
+
+(e) Knows(Father(y),y), Knows(x,x).
+    No unifier exists.
+
+
+2. Consider the following sentences:
+• John likes all kinds of food.
+• Apples are food.
+• Chicken is food.
+• Anything someone eats and isn’t killed by is food.
+• If you are killed by something, you are not alive.
+• Bill eats peanuts and is still alive. *
+• Sue eats everything Bill eats.
+Note: "some" (exists) is different from "any" (all)
+
+(a) Translate these sentences into formulas in first-order logic.
+"some" is existential, "any" is universal
+
+• ∀x(isFood(x) => Likes(John, x))
+    For all x, if x is food, then John likes it.
+• isFood(Apples)
+• isFood(Chicken)
+• ∀x ∃y((Eats(y,x) ∧ ¬Kills(x,y)) => isFood(x))
+    For all x (things), there exists y (someone) such that if y eats x and x does not kill y, then x is food.
+• ∀x ∃y(Kills(y,x) => ¬isAlive(x))
+    For all x (people), there exists y (something) such that if y kills x, then x is not alive.
+• Eats(Bill, Peanuts) ∧ isAlive(Bill)
+• ∀x(Eats(Bill, x) => Eats(Sue, x))
+    For all thiings x, if Bill eats it, then Sue eats it.
+
+
+(b) Convert the formulas of part (a) into CNF (also called clausal form).
+• ∀x(isFood(x) => Likes(John, x))
+∀x(¬isFood(x) ∨ Likes(John, x))
+1. ¬isFood(x) ∨ Likes(John, x)
+
+2. isFood(Apples)
+3. isFood(Chicken)
+
+• ∀x ∃y((Eats(y,x) ∧ ¬Kills(x,y)) => isFood(x))
+∀x ∃y(¬Eats(y,x) ∨ Kills(x,y) ∨ isFood(x))
+4. ¬Eats(F(x), x) ∨ Kills(x, F(x)) ∨ isFood(x)
+
+• ∀x ∃y(Kills(y,x) => ¬isAlive(x))
+∀x ∃y(¬Kills(y,x) ∨ ¬isAlive(x))
+5. ¬Kills(G(x),x) ∨ ¬isAlive(x)
+
+6. Eats(Bill, Peanuts)
+7. isAlive(Bill)
+
+• ∀x(Eats(Bill, x) => Eats(Sue, x))
+∀x(¬Eats(Bill, x) ∨ Eats(Sue, x))
+8. ¬Eats(Bill, x) ∨ Eats(Sue, x)
+
+In clausal form:
+1. ¬isFood(x) ∨ Likes(John, x)
+2. isFood(Apples)
+3. isFood(Chicken)
+4. ¬Eats(F(x), x) ∨ Kills(x, F(x)) ∨ isFood(x)
+5. ¬Kills(G(x),x) ∨ ¬isAlive(x)
+6. Eats(Bill, Peanuts)
+7. isAlive(Bill)
+8. ¬Eats(Bill, x) ∨ Eats(Sue, x)
+
+
+(c) Prove that John likes peanuts using resolution. Assume ¬α, which is ¬Likes(John, Peanuts)
+1. ¬isFood(x) ∨ Likes(John, x)
+2. isFood(Apples)
+3. isFood(Chicken)
+4. ¬Eats(F(x), x) ∨ Kills(x, F(x)) ∨ isFood(x)
+5. ¬Kills(G(x), x) ∨ ¬isAlive(x)
+6. Eats(Bill, Peanuts)
+7. isAlive(Bill)
+8. ¬Eats(Bill, x) ∨ Eats(Sue, x)
+---------------------------------
+9. ¬Likes(John, Peanuts)                                    ¬α
+10. ¬isFood(Peanuts)                                        1,9: {x/Peanuts}
+11. ¬Eats(F(Peanuts), Peanuts) ∨ Kills(Peanuts, F(Peanuts)) 4,11: {x/Peanuts}
+12. Kills(Peanuts, Bill)                                    6,11: {F(Peanuts)/Bill}
+13. ¬isAlive(Bill)                                          5,12: {x/Bill, G(Bill)/Peanuts}
+Contradiction: 7, 13
+Therefore, John likes peanuts, since KB ∧ ¬α is unsat.
+
+
+(d) Use resolution to answer the question, “What does Sue eat?”. Assume ¬α, which is ¬Eats(Sue, f)
+1. ¬isFood(x) ∨ Likes(John, x)
+2. isFood(Apples)
+3. isFood(Chicken)
+4. ¬Eats(F(x), x) ∨ Kills(x, F(x)) ∨ isFood(x)
+5. ¬Kills(G(x), x) ∨ ¬isAlive(x)
+6. Eats(Bill, Peanuts)
+7. isAlive(Bill)
+8. ¬Eats(Bill, x) ∨ Eats(Sue, x)
+---------------------------------
+9. ¬Eats(Sue, f)        ¬α 
+10. Eats(Sue, Peanuts)  6,8: {x/Peanuts}
+We have a contradiction between 9 and 10 after we unify f and Peanuts {f/Peanuts}; so, Sue eats peanuts.
+
+
+(e) Use resolution to answer (d) if, instead of the axiom marked with an asterisk
+above, we had:
+• If you don’t eat, you die.
+∀y((¬∃x(Eats(y, x)) => Dies(y))
+    For all people y, if there does not exist something x that y eats, then y dies.
+∀y((∃x(Eats(y,x)) ∨ Dies(y))
+Eats(y, H(y))) ∨ Dies(y)
+
+• If you die, you are not alive.
+∀x(Dies(x) => ¬isAlive(x))
+    For all people x, if x dies, then x is not alive.
+¬Dies(x) ∨ ¬isAlive(x)
+
+• Bill is alive.
+isAlive(Bill)
+
+What does Sue eat? Assume ¬α, which is ¬Eats(Sue, f)
+New KB:
+1. ¬isFood(x) ∨ Likes(John, x)
+2. isFood(Apples)
+3. isFood(Chicken)
+4. ¬Eats(F(x), x) ∨ Kills(x, F(x)) ∨ isFood(x)
+5. ¬Kills(G(x), x) ∨ ¬isAlive(x)
+6. Eats(y, H(y))) ∨ Dies(y)
+7. ¬Dies(x) ∨ ¬isAlive(x)
+8. isAlive(Bill)
+9. ¬Eats(Bill, x) ∨ Eats(Sue, x)
+-------------------------------------------
+10. ¬Eats(Sue, f)                          ¬α
+11. Dies(Bill) ∨ Eats(Sue, H(Bill))       6,9: {y/Bill, x/H(y)}
+12. ¬isAlive(Bill) ∨ Eats(Sue, H(Bill))   7,11: {x/Bill}
+13. Eats(Sue, H(Bill))                    8,12
+It is INCONCLUSIVE WHAT SUE EATS; it is just whatever Bill eats.
+We can go on to exhaust resolution, unable to find what Sue eats.
+We can find a contradiction to show that Sue eats f (something) but we cannot show what she eats.
+14. ¬Eats(Bill, f)                        9,10: {x/f}
+15. Dies(Bill)                            6,14: {y/Bill, H(y)/f}
+16. ¬isAlive(Bill)                        7,15: {x/Bill}
+Contradiction: 8,16
+Therefore, Sue eats something (f), since KB ∧ ¬α is unsat.
+However, it is inconclusive what she eats since it is unclear what Bill eats; all we 
+know is that he is alive, so he must eat something, which is the same as what Sue eats.
+
+
+3.1. Is the instance of graph1 and 3 colors satisfiable?
+No
+
+3.2. Is the instance of graph1 and 4 colors satisfiable?
+Yes
+
+3.3. What do the answers of these two SAT instances tell you about the graph
+coloring problem of the above graph? Can you give a solution (a coloring) to
+the graph coloring problem of the above graph based on the results of Rsat?
+The above answers tell us that 4 is the minimum amount of colors needed to meet the graph constraints. 
+Node    Color
+1       1
+2       3
+3       4
+4       1
+5       2
+6       3
+7       2
+
+3.4. What is the minimum number of colors required to properly
+color graph2?
+The minimum number of colors required to properly color graph2 is 8.
